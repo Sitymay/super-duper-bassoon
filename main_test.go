@@ -5,55 +5,86 @@ import (
 	"testing"
 )
 
-func TestGenerateRandomElementsNegativeSize(t *testing.T) {
-	result := generateRandomElements(-1)
+func TestGenerateRandomElements(t *testing.T) {
+	tests := []struct {
+		name     string
+		size     int
+		expected interface{}
+	}{
+		{
+			name:     "Ожидаем возрат nil на отрицательную длину слайса",
+			size:     -1,
+			expected: nil,
+		},
+		{
+			name:     "Нулевой размер слайса вернет пустой слайс",
+			size:     0,
+			expected: []int{},
+		},
+		{
+			name:     "Ожидаем возврат размера слайса равнозначный запрашиваемого",
+			size:     500,
+			expected: 500,
+		},
+	}
 
-	if result != nil {
-		t.Error("Получен отрицательный размер слайса")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := generateRandomElements(tt.size)
+
+			switch expected := tt.expected.(type) {
+			case nil:
+				if result != nil {
+					t.Error("Ожидался nil для отрицательного размера")
+				}
+			case []int:
+				if len(result) != 0 {
+					t.Error("Для нулевого размера ожидался пустой слайс")
+				}
+			case int:
+				if len(result) != expected {
+					t.Errorf("Ожидалась длина %d, получено %d", expected, len(result))
+				}
+			}
+		})
 	}
 }
 
-func TestGenerateRandomElementsZeroSize(t *testing.T) {
-	result := generateRandomElements(0)
-
-	if len(result) != 0 {
-		t.Error("Получена длина слайса не равная нулю")
+func TestMaximum(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    []int
+		expected int
+	}{
+		{
+			name:     "Пустой слайс",
+			input:    []int{},
+			expected: 0,
+		},
+		{
+			name:     "Один элемент в слайсе",
+			input:    []int{1},
+			expected: 1,
+		},
+		{
+			name:     "Слайс из отрицательных значений",
+			input:    []int{-1, -2, -3},
+			expected: -1,
+		},
+		{
+			name:     "Слайс из положительных значений",
+			input:    []int{10, 3, 1},
+			expected: 10,
+		},
 	}
-}
 
-func TestGenerateRandomElementsPositiveSize(t *testing.T) {
-	size := 500
-	result := generateRandomElements(size)
-
-	if len(result) != size {
-		t.Errorf("Ошибка! Ожидаемый размер %d, не совпадает с полученным %d", size, len(result))
-	}
-}
-
-func TestMaximumEmptySlice(t *testing.T) {
-	result := maximum([]int{}) // инициализируем пустой слайс
-	if result != 0 {
-		t.Error("Для пустого слайса ждали 0")
-	}
-}
-
-func TestMaximumSignleElement(t *testing.T) {
-	result := maximum([]int{1}) // инициализируем слайс с одним элементом
-	if result != 1 {
-		t.Error("Для слайса с одним элементом ждали 1")
-	}
-}
-
-func TestMaximumNegativeNumbers(t *testing.T) {
-	result := maximum([]int{-1, -2, -3}) // инициализируем слайс с отрицательными значениями
-	if result != -1 {
-		t.Error("Для слайса с отрицательными значениями ждали -1")
-	}
-}
-
-func TestMaximumPositiveNumbers(t *testing.T) {
-	result := maximum([]int{10, 3, 1}) // инициализируем слайс с положительными значениями
-	if result != 10 {
-		t.Error("Для слайса с положительными значениями ждали 10")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := maximum(tt.input)
+			if result != tt.expected {
+				t.Errorf("Для слайса %v ожидали %d, получили %d",
+					tt.input, tt.expected, result)
+			}
+		})
 	}
 }

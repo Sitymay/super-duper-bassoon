@@ -53,39 +53,30 @@ func maxChunks(data []int) int {
 		return 0
 	}
 
+	chunkSize := len(data) / CHUNKS           // делим общий слайс на 8 частей
 	maxValueFromChunks := make([]int, CHUNKS) //создаем слайс храним в нем максимальное значение каждого чанка
 	var wg sync.WaitGroup
 
 	for i := 0; i < CHUNKS; i++ {
 
 		wg.Add(1)
-		chunkSize := len(data) / CHUNKS // делим общий слайс на 8 частей
-		go func(index int) {
+		firstIndexChunk := i * chunkSize              // начальный индекс чанка
+		lastIndexChunk := firstIndexChunk + chunkSize // конечный индекс чанка
+		if i == CHUNKS-1 {
+			lastIndexChunk = len(data)
+		}
+
+		chunkSlice := data[firstIndexChunk:lastIndexChunk] // срез начального и конечного значения чанка
+
+		go func(index int, chunkSlice []int) {
 			defer wg.Done()
-			firstIndexChunk := index * chunkSize               // начальный индекс чанка
-			lastIndexChunk := firstIndexChunk + chunkSize      // конечный индекс чанка
-			chunkSlice := data[firstIndexChunk:lastIndexChunk] // срез начального и конечного значения чанка
 
-			// находим максимум в чанке
-			maxValueChunk := chunkSlice[0]
-			for _, value := range chunkSlice {
-				if value > maxValueChunk {
-					maxValueChunk = value
-				}
-
-			}
-			maxValueFromChunks[index] = maxValueChunk // сохраняем максимум в срез для максимумов всех чанков
-		}(i)
+			maxValueFromChunks[index] = maximum(chunkSlice) // сохраняем максимум в срез для максимумов всех чанков
+		}(i, chunkSlice)
 	}
 	wg.Wait()
-	// ищем общий максимум из среза максимумов чанков
-	maxOfAllChunks := maxValueFromChunks[0]
-	for _, v := range maxValueFromChunks {
-		if v > maxOfAllChunks {
-			maxOfAllChunks = v
-		}
-	}
-	return maxOfAllChunks // возвращаем максимальное значение
+
+	return maximum(maxValueFromChunks) // возвращаем максимальное значение
 }
 
 func main() {
